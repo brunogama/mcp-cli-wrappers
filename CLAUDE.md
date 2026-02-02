@@ -29,6 +29,7 @@ uv run TOOL.py list      # See all functions
 | **crawl4ai** | Web scraping | Scrape pages, extract content |
 | **firecrawl** | Advanced scraping | JS-heavy sites, structured extraction |
 | **ref** | Doc search | Find API/framework documentation |
+| **exa** | AI search | Neural semantic search with embeddings |
 | **deepwiki** | Repo docs | Understand GitHub repos, ask questions |
 | **gitmcp** | GitHub docs | Fetch llms.txt, READMEs from repos |
 | **semly** | Code analysis | Outline code, find patterns |
