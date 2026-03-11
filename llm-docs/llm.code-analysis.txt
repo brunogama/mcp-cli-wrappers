@@ -1,0 +1,164 @@
+# Code Analysis - CLI Wrappers
+
+## Overview
+
+Three tools for understanding and analyzing codebases: deepwiki for asking questions about any GitHub repository, repomix for packing codebases into AI-consumable formats, and apple-docset for querying local Apple/Xcode documentation.
+
+---
+
+## deepwiki.py
+
+AI-powered GitHub repository documentation. Ask natural language questions about any public GitHub repository and get detailed explanations of architecture, implementation details, and code patterns.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `structure` | Get repository structure and organization | `--owner`, `--repo` |
+| `contents` | Fetch repository contents | `--owner`, `--repo` |
+| `ask` | Ask a question about a repository | `--owner`, `--repo`, `--question` |
+
+### Usage
+
+```bash
+# Ask about a repo's architecture
+uv run deepwiki.py ask --owner facebook --repo react --question "How does the reconciler work?"
+
+# Understand implementation details
+uv run deepwiki.py ask --owner apple --repo swift --question "How is the type checker implemented?"
+
+# Get repo structure
+uv run deepwiki.py structure --owner anthropics --repo claude-code
+
+# Fetch contents
+uv run deepwiki.py contents --owner jlowin --repo fastmcp
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | json, text | text | Output format |
+| `--detail` | minimal, standard, full | full | Response detail level |
+
+### Environment
+
+No API key required. Uses the free DeepWiki service.
+
+---
+
+## repomix.py
+
+Pack entire codebases into AI-consumable format for analysis, review, or skill generation. Supports local and remote repositories with filtering.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `pack_codebase` | Pack a local codebase into a single file | `path`, `--include`, `--exclude` |
+| `pack_remote_repository` | Pack a remote GitHub repository | `--url` |
+| `generate_skill` | Generate a Claude Code skill from packed code | `--output` |
+| `attach_packed_output` | Attach previously packed output to context | `--path` |
+| `grep_repomix_output` | Search within packed output | `--pattern` |
+
+### Usage
+
+```bash
+# Pack entire local project
+uv run repomix.py pack_codebase ~/my-project
+
+# Pack with filters
+uv run repomix.py pack_codebase ~/project --include "*.swift" --exclude "Tests/*"
+
+# Pack a remote repo
+uv run repomix.py pack_remote_repository --url "https://github.com/owner/repo"
+
+# Generate a Claude skill
+uv run repomix.py generate_skill --output SKILL.md
+
+# Search packed output
+uv run repomix.py grep_repomix_output --pattern "class.*Controller"
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | text, json, table | text | Output format |
+| `--verbose` | flag | off | Show debug info |
+| `--include` | glob pattern | all | Include only matching files |
+| `--exclude` | glob pattern | none | Exclude matching files |
+
+### Environment
+
+No API key required. Operates on local files.
+
+---
+
+## apple-docset-cli/cli.py
+
+Query local Apple/Xcode DocSets for LLM/RAG workflows. Searches installed Xcode documentation without web scraping, returning structured results for API symbols, frameworks, and guides.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `list-docsets` | List all available local docsets | |
+| `search` | Search for API symbols and documentation | `query`, `--limit` |
+| `fetch` | Fetch full documentation for a specific path | `--docset`, `--path` |
+| `export` | Export docset to JSONL for vector DB ingestion | `--docset`, `--out`, `--max` |
+
+### Usage
+
+```bash
+# List available docsets
+uv run apple-docset-cli/cli.py list-docsets
+
+# Search for a symbol
+uv run apple-docset-cli/cli.py search "NSView" --limit 10
+
+# Search SwiftUI APIs
+uv run apple-docset-cli/cli.py search "SwiftUI State" --limit 5
+
+# Fetch full docs for a specific path
+uv run apple-docset-cli/cli.py fetch --docset "Apple API Reference" --path "documentation/appkit/nsview"
+
+# Export for RAG pipeline
+uv run apple-docset-cli/cli.py export --docset "Apple API Reference" --out apple.jsonl --max 500
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | json, text | text | Output format |
+| `--limit` | number | 10 | Max results to return |
+
+### Requirements
+
+- macOS with Xcode installed
+- Local docsets available in Xcode's documentation cache
+- AppleDocsetRAG Swift CLI built and available
+
+### Environment
+
+No API key required. Uses local Xcode documentation.
+
+---
+
+## Tool Selection Guide
+
+| Scenario | Tool | Why |
+|----------|------|-----|
+| Understand how an open-source project works | deepwiki `ask` | Natural language Q&A about any public repo |
+| Get repo overview and structure | deepwiki `structure` | Quick architectural overview |
+| Prepare codebase for AI code review | repomix `pack_codebase` | Creates single-file context |
+| Generate Claude Code skills from code | repomix `generate_skill` | Auto-generates skill definitions |
+| Look up Apple API documentation | apple-docset `search` | Fast local search, no network |
+| Export Apple docs for RAG/embeddings | apple-docset `export` | JSONL output for vector DBs |
+| Search patterns in packed codebase | repomix `grep_repomix_output` | Regex search in packed output |
+
+## Related Files
+- `llm.search.txt` - Web search tools for finding docs online
+- `llm.scraping.txt` - Web scraping for extracting content from pages
+- `llm.development.txt` - GitHub operations and Xcode build/test

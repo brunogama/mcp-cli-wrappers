@@ -1,0 +1,55 @@
+# CLI Wrappers - LLM Documentation
+
+## Project Metadata
+- **Name**: cli-wrappers
+- **Type**: CLI Tool Collection
+- **Language**: Python 3.10+
+- **Package Manager**: uv (Astral) with PEP 723 inline script metadata
+- **Purpose**: Token-efficient CLI wrappers for Model Context Protocol (MCP) servers
+
+## Quick Reference
+- **Total Tools**: 16 wrappers (7 standalone, 9 sub-projects)
+- **Patterns**: 4-level progressive disclosure, PEP 723 scripts, MCP tool calling
+- **CLI Framework**: Click (hand-crafted), argparse (generated)
+- **HTTP Client**: httpx with 30s timeout
+- **Dependencies**: httpx, pydantic, click, rich, fastmcp
+- **Token Savings**: 60-70% vs monolithic help systems
+
+## Documentation Structure
+
+### Scraping
+#### llm.scraping.txt
+- **Focus**: Web scraping and content extraction tools (crawl4ai, firecrawl, gitmcp)
+- **Use when**: Need to extract content from web pages, crawl sites, or fetch GitHub repo docs
+
+### Search
+#### llm.search.txt
+- **Focus**: Web search and documentation lookup tools (exa, ref, brave, tavily, perplexity)
+- **Use when**: Need to find information, search docs, or perform AI-powered research
+
+### Code Analysis
+#### llm.code-analysis.txt
+- **Focus**: Repository understanding and code packing tools (deepwiki, repomix, apple-docset)
+- **Use when**: Need to analyze repos, pack codebases for AI, or query Apple documentation
+
+### Orchestration
+#### llm.orchestration.txt
+- **Focus**: Reasoning, multi-agent workflows, and sandboxed execution (sequential-thinking, claude-flow, flow-nexus)
+- **Use when**: Need multi-step reasoning, agent coordination, or isolated code execution
+
+### Development
+#### llm.development.txt
+- **Focus**: GitHub operations and Xcode build/test tools (github-cli, xcode-cli)
+- **Use when**: Need to manage repos, issues, PRs, or build/test Xcode projects
+
+### Architecture
+#### llm.architecture.txt
+- **Focus**: Project conventions, 4-level help pattern, setup, and contribution guidelines
+- **Use when**: Need to understand project structure, add new wrappers, or configure the environment
+
+## Reading Guide
+
+1. Start with `llm.version.txt` for metadata
+2. Read `llm.architecture.txt` for project conventions and setup
+3. Reference domain files based on the tool category you need
+4. Each tool entry includes: purpose, functions, parameters, examples, and API key requirements

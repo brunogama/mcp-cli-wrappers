@@ -1,0 +1,154 @@
+# Scraping - CLI Wrappers
+
+## Overview
+
+Three tools for web content extraction: crawl4ai for fast static scraping, firecrawl for JavaScript-heavy sites with structured extraction, and gitmcp for GitHub repository documentation via the gitmcp.io SSE gateway.
+
+---
+
+## crawl4ai.py
+
+Fast web scraping and crawling via the Crawl4AI MCP server.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `scrape` | Extract content from a single URL | `--url` (required) |
+| `crawl` | Crawl multiple pages from a starting URL | `--url` (required) |
+
+### Usage
+
+```bash
+# Scrape a single page
+uv run crawl4ai.py scrape --url https://example.com/article
+
+# Crawl a site
+uv run crawl4ai.py crawl --url https://docs.example.com
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | json, text | text | Output format |
+| `--detail` | minimal, standard, full | full | Detail level |
+| `--verbose` | flag | off | Show debug info |
+| `--discover` | flag | off | Auto-discover MCP server |
+
+### Environment
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `CRAWL4AI_MCP_DIR` | Optional | Path to Crawl4AI MCP server directory |
+
+---
+
+## firecrawl-cli/cli.py
+
+Advanced web scraping with JavaScript rendering, structured extraction, and site mapping. Powered by the Firecrawl API.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `scrape` | Scrape a single URL with JS rendering | `--url`, `--only-main-content`, `--formats` |
+| `crawl` | Crawl multiple pages from a URL | `--url`, `--limit`, `--max-depth` |
+| `extract` | Extract structured data using a prompt | `--urls`, `--prompt`, `--schema` |
+| `map` | Discover all URLs on a site | `--url`, `--limit` |
+| `search` | Search the web via Firecrawl | `--query`, `--limit` |
+
+### Usage
+
+```bash
+# Scrape with JS rendering
+uv run firecrawl-cli/cli.py scrape --url "https://spa-app.com" --only-main-content
+
+# Map a site to discover pages
+uv run firecrawl-cli/cli.py map --url "https://docs.example.com" --limit 100
+
+# Extract structured data
+uv run firecrawl-cli/cli.py extract --urls "https://shop.com/product" --prompt "Extract price and title"
+
+# Crawl with depth control
+uv run firecrawl-cli/cli.py crawl --url "https://site.com" --limit 50 --max-depth 3
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | text, json | text | Output format |
+| `--verbose` | flag | off | Show debug info |
+| `--discover` | flag | off | Auto-discover MCP server |
+| `--only-main-content` | flag | off | Strip navigation/footer |
+| `--formats` | markdown, html, links | markdown | Content format |
+
+### Environment
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `FIRECRAWL_API_KEY` | Yes | Firecrawl API key |
+
+---
+
+## gitmcp.py
+
+Fetch and search documentation from GitHub repositories via the gitmcp.io SSE gateway. Retrieves llms.txt, READMEs, and structured docs without cloning repos.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `match_common_libs_owner_repo_mapping` | Map library names to GitHub owner/repo | `--lib-name` |
+| `fetch_generic_documentation` | Fetch repo documentation (llms.txt, README) | `--owner`, `--repo` |
+| `search_generic_documentation` | Search within a repo's documentation | `--owner`, `--repo`, `--query` |
+| `search_generic_code` | Search code within a repository | `--owner`, `--repo`, `--query` |
+| `fetch_generic_url_content` | Fetch content from any URL | `--url` |
+
+### Usage
+
+```bash
+# Fetch repo documentation
+uv run gitmcp.py fetch_generic_documentation --owner anthropics --repo claude-code
+
+# Search repo docs
+uv run gitmcp.py search_generic_documentation --owner jlowin --repo fastmcp --query "tools"
+
+# Search code
+uv run gitmcp.py search_generic_code --owner openai --repo openai-python --query "chat completions"
+
+# Resolve library name to repo
+uv run gitmcp.py match_common_libs_owner_repo_mapping --lib-name fastmcp
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | text, json | text | Output format |
+| `--verbose` | flag | off | Show debug info |
+| `--discover` | flag | off | Auto-discover MCP server |
+
+### Environment
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITMCP_URL` | Optional | SSE endpoint (default: https://gitmcp.io/docs) |
+
+---
+
+## Tool Selection Guide
+
+| Scenario | Tool | Why |
+|----------|------|-----|
+| Quick text extraction from static page | crawl4ai | Fastest, no API key needed |
+| JavaScript-rendered SPA content | firecrawl | Full JS rendering support |
+| Structured data extraction (prices, dates) | firecrawl `extract` | Schema-based extraction |
+| Site-wide URL discovery | firecrawl `map` | Returns all discoverable URLs |
+| GitHub repo documentation | gitmcp | Direct llms.txt/README access |
+| Code search within a repo | gitmcp `search_generic_code` | No clone required |
+
+## Related Files
+- `llm.search.txt` - Search tools for finding information across the web
+- `llm.architecture.txt` - Project setup and environment configuration

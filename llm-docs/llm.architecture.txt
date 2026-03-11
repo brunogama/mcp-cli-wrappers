@@ -1,0 +1,278 @@
+# Architecture - CLI Wrappers
+
+## Overview
+
+CLI Wrappers is a collection of 16 self-contained Python CLI tools that wrap MCP (Model Context Protocol) servers. All tools follow a consistent 4-level progressive disclosure pattern, use PEP 723 for dependency management, and require no installation beyond `uv`.
+
+---
+
+## Project Structure
+
+```
+cli-wrappers/
+├── *.py                         # Standalone wrappers (7 tools)
+│   ├── crawl4ai.py              # Web scraping
+│   ├── claude-flow.py           # Multi-agent orchestration
+│   ├── deepwiki.py              # GitHub repo Q&A
+│   ├── exa.py                   # Neural search
+│   ├── flow-nexus.py            # Sandboxed execution
+│   ├── gitmcp.py                # GitHub docs via SSE
+│   └── repomix.py               # Codebase packing
+├── *-cli/                       # Sub-project wrappers (9 tools)
+│   ├── apple-docset-cli/cli.py  # Apple documentation
+│   ├── brave-search-cli/cli.py  # Brave search
+│   ├── firecrawl-cli/cli.py     # Advanced scraping
+│   ├── github-cli/cli.py        # GitHub API
+│   ├── perplexity-cli/cli.py    # Perplexity AI search
+│   ├── ref-cli/cli.py           # Documentation search
+│   ├── sequential-thinking-cli/ # Multi-step reasoning
+│   ├── tavily-cli/cli.py        # AI search
+│   └── xcode-cli/cli.py         # Xcode control
+├── generate-all-wrappers.py     # Wrapper generator script
+├── templates/                   # Jinja2 wrapper templates
+├── llm-docs/                    # This documentation
+├── docs/                        # Additional documentation
+├── .claude/                     # Claude Code configuration
+├── CLAUDE.md                    # Development guidelines
+├── README.md                    # User-facing documentation
+└── LLMs.txt                     # LLM-optimized full reference
+```
+
+### Wrapper Types
+
+| Type | CLI Framework | Location | Characteristics |
+|------|--------------|----------|-----------------|
+| Auto-generated | argparse | Root `*.py` | Template-based, fastmcp tool calling |
+| Hand-crafted | Click + Rich | `*-cli/cli.py` | Full API integration, tests, sub-project docs |
+
+---
+
+## 4-Level Progressive Disclosure
+
+Every tool implements this pattern to minimize token usage:
+
+### Level 1: `--help` (~30 tokens)
+```bash
+uv run TOOL.py --help
+```
+Quick overview with available functions and basic usage.
+
+### Level 2: `list` and `info` (~150 tokens)
+```bash
+uv run TOOL.py list                    # All functions
+uv run TOOL.py info FUNCTION_NAME      # Detailed function docs
+```
+Full function signatures, parameters with types, return formats.
+
+### Level 3: `example` (~200 tokens)
+```bash
+uv run TOOL.py example FUNCTION_NAME
+```
+2-3 working examples with realistic data, copy-paste ready.
+
+### Level 4: `FUNCTION --help` (~500 tokens)
+```bash
+uv run TOOL.py FUNCTION_NAME --help
+```
+Complete argparse reference with all options and error cases.
+
+### Token Savings
+
+| Approach | Tokens per Tool | Total (16 tools) |
+|----------|----------------|-------------------|
+| Monolithic help | ~500 | ~8,000 |
+| Progressive (Level 1 only) | ~30 | ~480 |
+| Progressive (Levels 1+2) | ~180 | ~2,880 |
+| **Savings** | **64-94%** | |
+
+---
+
+## PEP 723 Script Metadata
+
+All standalone wrappers use inline script metadata for zero-install execution:
+
+```python
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "httpx>=0.24.0",
+#     "click>=8.0",
+#     "rich>=13.0",
+# ]
+# ///
+```
+
+Run any wrapper directly: `uv run TOOL.py FUNCTION`
+
+---
+
+## Output Formats
+
+All tools support consistent output formatting:
+
+| Flag | Format | Use Case |
+|------|--------|----------|
+| `--format json` | JSON | Machine-readable, piping to `jq` |
+| `--format text` | Plain text | Human-readable terminal output |
+| `--format table` | ASCII table | Tabular data display |
+
+### Detail Levels
+
+| Flag | Level | Tokens |
+|------|-------|--------|
+| `--detail minimal` | Status only | ~50 |
+| `--detail standard` | Preview | ~150 |
+| `--detail full` | Complete (default) | ~500+ |
+
+---
+
+## Environment Setup
+
+### Required API Keys
+
+```bash
+# Search tools
+export EXA_API_KEY="..."               # exa.py
+export REF_API_KEY="ref-..."           # ref-cli
+export BRAVE_API_KEY="..."             # brave-search-cli
+export TAVILY_API_KEY="..."            # tavily-cli
+export PERPLEXITY_API_KEY="..."        # perplexity-cli
+
+# Scraping
+export FIRECRAWL_API_KEY="fc-..."      # firecrawl-cli
+
+# Development
+export GITHUB_TOKEN="ghp_..."          # github-cli
+```
+
+### Optional Configuration
+
+```bash
+export CRAWL4AI_MCP_DIR="..."          # crawl4ai MCP server path
+export GITMCP_URL="..."               # gitmcp SSE endpoint
+export EXA_API_URL="..."              # Custom Exa endpoint
+export EXA_TIMEOUT="30"               # Exa timeout seconds
+export REF_API_URL="..."              # Custom Ref endpoint
+export REF_TIMEOUT="30"               # Ref timeout seconds
+```
+
+### No API Key Needed
+
+These tools work without any API key:
+- `crawl4ai.py` - Local MCP server
+- `deepwiki.py` - Free service
+- `repomix.py` - Local operation
+- `gitmcp.py` - Public SSE gateway
+- `apple-docset-cli/cli.py` - Local Xcode docs
+- `sequential-thinking-cli/cli.py` - Local MCP server
+- `claude-flow.py` - Local MCP server
+- `flow-nexus.py` - Local MCP server
+- `xcode-cli/cli.py` - Local XcodeMCP server
+
+---
+
+## Adding New Wrappers
+
+### Auto-Generated (Recommended for Simple MCP Wrappers)
+
+1. Update MCP definitions in `generate-all-wrappers.py`
+2. Run: `uv run generate-all-wrappers.py`
+3. Test: `uv run NEW_WRAPPER.py list`
+
+### Hand-Crafted (For Feature-Rich Tools)
+
+1. Create directory: `mkdir new-tool-cli`
+2. Create `new-tool-cli/cli.py` with PEP 723 header
+3. Implement 4-level help pattern (list, info, example, --help)
+4. Add `CLAUDE.md`, `README.md`, `tests/` directory
+5. Test all levels: `uv run new-tool-cli/cli.py --help`
+
+### Required Pattern Implementation
+
+Every wrapper must implement:
+
+```python
+# QUICK_HELP - Level 1 help text
+QUICK_HELP = """Tool Name - Brief description..."""
+
+# FUNCTION_INFO - Level 2 function details
+FUNCTION_INFO = {
+    "function_name": {
+        "description": "What it does",
+        "parameters": {...},
+        "returns": "Return type"
+    }
+}
+
+# FUNCTION_EXAMPLES - Level 3 examples
+FUNCTION_EXAMPLES = {
+    "function_name": [
+        {"description": "Basic usage", "command": "uv run tool.py func --arg val"}
+    ]
+}
+```
+
+---
+
+## Development Rules
+
+### Must Follow
+- PEP 723 headers for uv script execution
+- Return valid JSON from all functions
+- Validate arguments before execution
+- Check API keys exist before MCP calls
+- Follow 4-level progressive disclosure
+- No external CLI dependencies beyond httpx, pydantic, click, rich
+
+### Must Not Do
+- Use `subprocess.run()` with `shell=True`
+- Store credentials in code
+- Execute user input directly
+- Suppress errors silently
+- Skip argument validation
+
+### Testing
+
+```bash
+# Quick validation of all wrappers
+for wrapper in *.py; do
+  echo "Testing $wrapper..."
+  timeout 10 uv run "$wrapper" --help >/dev/null 2>&1 || echo "FAILED: $wrapper"
+done
+
+# Validate JSON output
+uv run WRAPPER.py FUNCTION | jq .
+
+# Test each disclosure level
+uv run WRAPPER.py --help
+uv run WRAPPER.py list
+uv run WRAPPER.py info FUNCTION
+uv run WRAPPER.py example FUNCTION
+```
+
+---
+
+## Integration Patterns
+
+### Piping to jq
+```bash
+uv run firecrawl-cli/cli.py search "query" | jq '.results[] | {title, url}'
+```
+
+### Chaining Tools
+```bash
+# Search docs, then read the top result
+URL=$(uv run ref-cli/cli.py search --query "SwiftUI" --format json | jq -r '.results[0].url')
+uv run ref-cli/cli.py read_url --url "$URL"
+```
+
+### Saving Results
+```bash
+uv run repomix.py pack_codebase ~/project > codebase.txt
+uv run exa.py research "topic" --format json > research.json
+```
+
+## Related Files
+- `llm.txt` - Main index and reading guide
+- `llm.version.txt` - Version and sync metadata

@@ -1,0 +1,240 @@
+# Development - CLI Wrappers
+
+## Overview
+
+Two tools for software development workflows: github-cli for comprehensive GitHub API operations (repos, issues, PRs, actions, files), and xcode-cli for controlling Xcode builds, tests, and xcresult analysis via MCP.
+
+---
+
+## github-cli/cli.py
+
+Full GitHub API operations organized into namespaces: actions, file, issue, label, org, pr, release, repo, and user.
+
+### Function Namespaces
+
+#### Actions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `get_job_logs` | Get logs for a workflow job | `--owner`, `--repo`, `--job-id` |
+| `get_workflow_run` | Get details of a workflow run | `--owner`, `--repo`, `--run-id` |
+| `list_workflow_runs` | List workflow runs | `--owner`, `--repo` |
+| `list_workflows` | List repository workflows | `--owner`, `--repo` |
+| `run_workflow` | Trigger a workflow run | `--owner`, `--repo`, `--workflow-id` |
+
+#### File Operations
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `create_or_update_file` | Create or update a file in a repo | `--owner`, `--repo`, `--path`, `--content` |
+| `delete_file` | Delete a file from a repo | `--owner`, `--repo`, `--path` |
+| `push_files` | Push multiple files in a single commit | `--owner`, `--repo`, `--files`, `--message` |
+
+#### Issues
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `add_issue_comment` | Comment on an issue | `--owner`, `--repo`, `--issue-number`, `--body` |
+| `create_issue` | Create a new issue | `--owner`, `--repo`, `--title`, `--body` |
+| `get_issue` | Get issue details | `--owner`, `--repo`, `--issue-number` |
+| `list_issues` | List repository issues | `--owner`, `--repo`, `--state` |
+| `search_issues` | Search issues across repos | `--query` |
+| `update_issue` | Update an existing issue | `--owner`, `--repo`, `--issue-number` |
+
+#### Labels
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `create_label` | Create a label | `--owner`, `--repo`, `--name`, `--color` |
+| `list_labels` | List repository labels | `--owner`, `--repo` |
+
+#### Pull Requests
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `create_pull_request` | Create a PR | `--owner`, `--repo`, `--title`, `--head`, `--base` |
+| `get_pull_request` | Get PR details | `--owner`, `--repo`, `--pull-number` |
+| `list_pull_requests` | List PRs | `--owner`, `--repo`, `--state` |
+| `merge_pull_request` | Merge a PR | `--owner`, `--repo`, `--pull-number` |
+| `update_pull_request` | Update a PR | `--owner`, `--repo`, `--pull-number` |
+
+#### Releases
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `get_latest_release` | Get latest release | `--owner`, `--repo` |
+| `get_release_by_tag` | Get release by tag name | `--owner`, `--repo`, `--tag` |
+| `list_releases` | List all releases | `--owner`, `--repo` |
+
+#### Repository
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `create_branch` | Create a branch | `--owner`, `--repo`, `--branch`, `--from-branch` |
+| `create_repository` | Create a new repository | `--name`, `--description` |
+| `fork_repository` | Fork a repository | `--owner`, `--repo` |
+| `get_commit` | Get commit details | `--owner`, `--repo`, `--sha` |
+| `get_file_contents` | Get file contents | `--owner`, `--repo`, `--path` |
+| `list_branches` | List branches | `--owner`, `--repo` |
+| `list_commits` | List commits | `--owner`, `--repo` |
+| `search_code` | Search code across GitHub | `--query` |
+| `search_repositories` | Search repositories | `--query` |
+
+#### User & Org
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `get_me` | Get authenticated user info | |
+| `search_users` | Search GitHub users | `--query` |
+| `search_orgs` | Search organizations | `--query` |
+
+### Usage
+
+```bash
+# List open issues
+uv run github-cli/cli.py list_issues --owner myorg --repo myrepo --state open
+
+# Create a pull request
+uv run github-cli/cli.py create_pull_request \
+  --owner myorg --repo myrepo \
+  --title "Add caching layer" --head feature/cache --base main
+
+# Get file contents
+uv run github-cli/cli.py get_file_contents --owner myorg --repo myrepo --path README.md
+
+# Push files
+uv run github-cli/cli.py push_files \
+  --owner myorg --repo myrepo \
+  --files '[{"path":"src/new.py","content":"print(1)"}]' \
+  --message "Add new module"
+
+# Search code
+uv run github-cli/cli.py search_code --query "actor protocol language:swift"
+
+# List workflow runs
+uv run github-cli/cli.py list_workflow_runs --owner myorg --repo myrepo
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | text, json, table | text | Output format |
+| `--detail` | summary, normal, detailed, debug | normal | Detail level |
+
+### Environment
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITHUB_TOKEN` | Yes | GitHub Personal Access Token (needs repo, issues, pull_request scopes) |
+
+---
+
+## xcode-cli/cli.py
+
+Control Xcode through MCP for builds, tests, project management, and xcresult analysis. Requires the XcodeMCP server to be running.
+
+### Function Categories
+
+#### Project Management
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `xcode_get_projects` | List open Xcode projects | |
+| `xcode_get_workspace_info` | Get workspace information | |
+| `xcode_open_project` | Open an Xcode project | `--xcodeproj` |
+| `xcode_close_project` | Close an Xcode project | `--xcodeproj` |
+| `xcode_open_file` | Open a file in Xcode | `--path` |
+| `xcode_refresh_project` | Refresh project index | `--xcodeproj` |
+
+#### Build & Run
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `xcode_build` | Build a project | `--xcodeproj`, `--scheme` |
+| `xcode_build_and_run` | Build and run | `--xcodeproj`, `--scheme`, `--destination` |
+| `xcode_clean` | Clean build artifacts | `--xcodeproj`, `--scheme` |
+| `xcode_test` | Run tests | `--xcodeproj`, `--scheme`, `--destination` |
+| `xcode_debug` | Start debugging | `--xcodeproj`, `--scheme` |
+| `xcode_stop` | Stop running process | |
+
+#### Configuration
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `xcode_get_schemes` | List available schemes | `--xcodeproj` |
+| `xcode_get_run_destinations` | List run destinations (simulators, devices) | `--xcodeproj` |
+| `xcode_get_test_targets` | List test targets | `--xcodeproj` |
+| `xcode_set_active_scheme` | Set the active scheme | `--xcodeproj`, `--scheme` |
+
+#### XCResult Analysis
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `xcresult_summary` | Get test result summary | `--xcresult-path` |
+| `xcresult_browse` | Browse xcresult contents | `--xcresult-path` |
+| `xcresult_browser_get_console` | Get console output from test | `--xcresult-path`, `--test-id` |
+| `xcresult_get_screenshot` | Get test screenshot | `--xcresult-path`, `--attachment-id` |
+| `xcresult_get_ui_element` | Get UI element details | `--xcresult-path`, `--element-id` |
+| `xcresult_get_ui_hierarchy` | Get UI hierarchy tree | `--xcresult-path` |
+| `xcresult_list_attachments` | List all test attachments | `--xcresult-path` |
+| `xcresult_export_attachment` | Export an attachment to file | `--xcresult-path`, `--attachment-id`, `--output` |
+| `find_xcresults` | Find xcresult bundles on disk | `--path` |
+
+### Usage
+
+```bash
+# List schemes
+uv run xcode-cli/cli.py xcode_get_schemes --xcodeproj /path/to/MyApp.xcodeproj
+
+# Build
+uv run xcode-cli/cli.py xcode_build --xcodeproj /path/to/MyApp.xcodeproj --scheme MyApp
+
+# Run tests on a simulator
+uv run xcode-cli/cli.py xcode_test \
+  --xcodeproj /path/to/MyApp.xcodeproj \
+  --scheme MyAppTests \
+  --destination "iPhone 15"
+
+# Analyze test results
+uv run xcode-cli/cli.py xcresult_summary --xcresult-path /path/to/Test.xcresult
+
+# Get console output from a failed test
+uv run xcode-cli/cli.py xcresult_browser_get_console \
+  --xcresult-path /path/to/Test.xcresult --test-id "MyTests/testExample"
+
+# Find xcresult bundles
+uv run xcode-cli/cli.py find_xcresults --path ~/Library/Developer/Xcode/DerivedData
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | json, text, table | text | Output format |
+| `--verbose` | flag | off | Show debug info |
+
+### Environment
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| XcodeMCP | Yes | XcodeMCP MCP server must be running and configured |
+
+---
+
+## Tool Selection Guide
+
+| Scenario | Tool | Function |
+|----------|------|----------|
+| Create a PR from CLI | github-cli | `create_pull_request` |
+| Triage open issues | github-cli | `list_issues --state open` |
+| Push files to a branch | github-cli | `push_files` |
+| Check CI/CD status | github-cli | `list_workflow_runs` |
+| Build an Xcode project | xcode-cli | `xcode_build` |
+| Run unit tests | xcode-cli | `xcode_test` |
+| Debug test failures | xcode-cli | `xcresult_summary` + `xcresult_browser_get_console` |
+| Find test screenshots | xcode-cli | `xcresult_list_attachments` + `xcresult_get_screenshot` |
+
+## Related Files
+- `llm.code-analysis.txt` - Repository analysis and code packing
+- `llm.architecture.txt` - Project setup and conventions

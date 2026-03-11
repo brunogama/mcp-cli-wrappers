@@ -1,0 +1,258 @@
+# Search - CLI Wrappers
+
+## Overview
+
+Five search tools covering different use cases: exa for neural semantic search and agentic research, ref for technical documentation lookup, brave for privacy-focused web search, tavily for AI-optimized search with extraction, and perplexity for conversational AI search with citations.
+
+---
+
+## exa.py
+
+AI-powered neural search with embeddings, agentic research, and code-specific search. The most feature-rich search tool in the collection.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `search` | Neural semantic web search | `query`, `--num-results`, `--type`, `--category` |
+| `deep-search` | Extended search with more results | `query`, `--num-results` |
+| `research` | Agentic research: plans queries, reads pages, synthesizes answer | `query`, `--model`, `--output-format` |
+| `code-search` | Search targeting code repos, Stack Overflow, official docs | `query`, `--num-results` |
+| `company-research` | Research a company by name or domain | `query` |
+| `find-similar` | Find pages similar to a given URL | `--url` |
+| `get-contents` | Extract content from URLs | `--urls`, `--livecrawl` |
+| `config` | Show current configuration | |
+| `version` | Show version info | |
+
+### Usage
+
+```bash
+# Basic semantic search
+uv run exa.py search "best practices for Swift concurrency 2024"
+
+# Deep search with more results
+uv run exa.py deep-search "React server components" --num-results 20
+
+# Agentic research (higher cost, synthesized answer with citations)
+uv run exa.py research "compare SQLite vs PostgreSQL for mobile apps"
+
+# Code-specific search
+uv run exa.py code-search "SwiftUI custom view modifier" --num-results 10
+
+# Get fresh content from a URL
+uv run exa.py get-contents --urls "https://blog.example.com/latest" --livecrawl always
+
+# Find similar pages
+uv run exa.py find-similar --url "https://example.com/article"
+```
+
+### Search Filters
+
+| Flag | Description | Example |
+|------|-------------|---------|
+| `--include-domains` | Only search these domains | `--include-domains github.com,stackoverflow.com` |
+| `--exclude-domains` | Skip these domains | `--exclude-domains reddit.com` |
+| `--start-published-date` | Filter by publish date | `--start-published-date 2024-01-01` |
+| `--category` | Content category | `--category research_paper` |
+| `--type` | Search type | `--type neural` or `--type keyword` |
+
+### Environment
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `EXA_API_KEY` | Yes | Exa API key |
+| `EXA_API_URL` | Optional | Custom API endpoint |
+| `EXA_TIMEOUT` | Optional | Request timeout in seconds |
+
+### Cost Notes
+
+- `search` / `deep-search`: Standard per-query pricing
+- `research`: Higher cost (charges for search, page reads, and reasoning tokens separately)
+- `get-contents --livecrawl`: Additional cost for live crawling
+
+---
+
+## ref-cli/cli.py
+
+Technical documentation search and validation. Searches official documentation sources for API references, framework guides, and best practices.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `search` | Search technical documentation | `--query`, `--limit` |
+| `read_url` | Read and extract content from a documentation URL | `--url` |
+| `check` | Validate a documentation reference | |
+| `analyze` | Analyze documentation quality | |
+| `info` | Show tool information | |
+| `version` | Show version | |
+| `config` | Show configuration | |
+
+### Usage
+
+```bash
+# Search documentation
+uv run ref-cli/cli.py search --query "SwiftUI State management" --limit 5
+
+# Read a specific doc page
+uv run ref-cli/cli.py read_url --url "https://docs.python.org/3/library/asyncio.html"
+```
+
+### Environment
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `REF_API_KEY` | Yes | Ref Tools API key |
+| `REF_API_URL` | Optional | Custom API endpoint |
+| `REF_TIMEOUT` | Optional | Request timeout in seconds |
+
+---
+
+## brave-search-cli/cli.py
+
+Privacy-focused web search with rich result types including web, local, video, image, and news search.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `web_search` | General web search | `query`, `--count`, `--freshness` |
+| `local_search` | Search for local businesses/places | `query`, `--count` |
+| `video_search` | Search for videos | `query`, `--count` |
+| `image_search` | Search for images | `query`, `--count` |
+| `news_search` | Search recent news | `query`, `--count`, `--freshness` |
+| `summarizer` | Get AI-generated summary of search results | `query` |
+
+### Usage
+
+```bash
+# Web search
+uv run brave-search-cli/cli.py web_search "Python async best practices" --count 10
+
+# News search with freshness filter
+uv run brave-search-cli/cli.py news_search "AI regulation" --freshness pd
+
+# Local business search
+uv run brave-search-cli/cli.py local_search "coffee shops near San Francisco"
+
+# AI summary
+uv run brave-search-cli/cli.py summarizer "what is model context protocol"
+```
+
+### Freshness Values
+
+| Value | Description |
+|-------|-------------|
+| `pd` | Past day |
+| `pw` | Past week |
+| `pm` | Past month |
+| `py` | Past year |
+
+### Environment
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `BRAVE_API_KEY` | Yes | Brave Search API key |
+
+---
+
+## tavily-cli/cli.py
+
+AI-optimized web search with content extraction and site mapping capabilities.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `search` | AI-powered web search | `query`, `--max-results`, `--search-depth` |
+| `extract` | Extract content from URLs | `--urls` |
+| `map` | Map a website's structure | `--url`, `--limit` |
+| `crawl` | Crawl pages from a URL | `--url`, `--limit` |
+
+### Usage
+
+```bash
+# AI search
+uv run tavily-cli/cli.py search "how to implement OAuth2 in iOS" --max-results 5
+
+# Extract content
+uv run tavily-cli/cli.py extract --urls "https://docs.example.com/api"
+
+# Map site structure
+uv run tavily-cli/cli.py map --url "https://docs.example.com"
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | text, json | text | Output format |
+| `--detail` | minimal, standard, full | full | Detail level |
+| `--search-depth` | basic, advanced | basic | Search thoroughness |
+
+### Environment
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `TAVILY_API_KEY` | Yes | Tavily API key |
+
+---
+
+## perplexity-cli/cli.py
+
+Conversational AI search using Perplexity's Sonar models. Supports multiple model tiers for different depth/speed tradeoffs.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `ask` | Ask a question with web-grounded answer | `query` |
+| `research` | Deep research with citations | `query` |
+| `reason` | Reasoning-focused analysis | `query` |
+| `search` | Quick web search | `query` |
+
+### Models
+
+| Model | Best For |
+|-------|----------|
+| `sonar-pro` | General questions, balanced speed/quality |
+| `sonar-deep-research` | In-depth research requiring multiple sources |
+| `sonar-reasoning-pro` | Complex reasoning and analysis tasks |
+
+### Usage
+
+```bash
+# Quick question
+uv run perplexity-cli/cli.py ask "What is the latest version of Swift?"
+
+# Deep research
+uv run perplexity-cli/cli.py research "compare actor model implementations across languages"
+
+# Reasoning
+uv run perplexity-cli/cli.py reason "should I use SwiftUI or UIKit for a new iOS app in 2026?"
+```
+
+### Environment
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PERPLEXITY_API_KEY` | Yes | Perplexity API key |
+
+---
+
+## Tool Selection Guide
+
+| Scenario | Tool | Why |
+|----------|------|-----|
+| Semantic/neural search for articles | exa `search` | Best embedding-based relevance |
+| Synthesized research answer with citations | exa `research` | Plans queries, reads pages, synthesizes |
+| Code examples and implementation patterns | exa `code-search` | Targets code repos and Stack Overflow |
+| Official API/framework documentation | ref | Searches official doc sources |
+| Privacy-focused general web search | brave | No tracking, rich result types |
+| AI-optimized search with extraction | tavily | Good for content + search combo |
+| Conversational Q&A with citations | perplexity | Natural language answers with sources |
+| Latest news on a topic | brave `news_search` | Freshness filters, news-specific |
+
+## Related Files
+- `llm.scraping.txt` - Content extraction and crawling tools
+- `llm.code-analysis.txt` - Repository analysis and documentation tools

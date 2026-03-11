@@ -1,0 +1,158 @@
+# Orchestration - CLI Wrappers
+
+## Overview
+
+Three tools for advanced reasoning and execution: sequential-thinking for multi-step problem decomposition, claude-flow for coordinating multiple Claude agents, and flow-nexus for sandboxed code execution in isolated environments.
+
+---
+
+## sequential-thinking-cli/cli.py
+
+Multi-step reasoning engine for complex problems. Breaks down analysis into numbered thought steps with explicit tracking of progress and remaining work.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `sequentialthinking` | Execute a reasoning step | `--thought`, `--thoughtNumber`, `--totalThoughts`, `--nextThoughtNeeded` |
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `--thought` | string | Yes | The current thought/analysis step |
+| `--thoughtNumber` | int | Yes | Current step number (1-based) |
+| `--totalThoughts` | int | Yes | Estimated total steps needed |
+| `--nextThoughtNeeded` | bool | Yes | Whether more steps are needed |
+
+### Usage
+
+```bash
+# Single-step analysis
+uv run sequential-thinking-cli/cli.py sequentialthinking \
+  --thought "Design a caching strategy for a mobile app with offline support" \
+  --thoughtNumber 1 --totalThoughts 5 --nextThoughtNeeded true
+
+# Multi-step reasoning chain
+uv run sequential-thinking-cli/cli.py sequentialthinking \
+  --thought "Step 1: Identify cache invalidation requirements" \
+  --thoughtNumber 1 --totalThoughts 3 --nextThoughtNeeded true
+
+uv run sequential-thinking-cli/cli.py sequentialthinking \
+  --thought "Step 2: Evaluate LRU vs LFU eviction policies" \
+  --thoughtNumber 2 --totalThoughts 3 --nextThoughtNeeded true
+
+uv run sequential-thinking-cli/cli.py sequentialthinking \
+  --thought "Step 3: Recommend architecture with trade-off summary" \
+  --thoughtNumber 3 --totalThoughts 3 --nextThoughtNeeded false
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | text, json | text | Output format |
+| `--verbose` | flag | off | Show debug info |
+| `--discover` | flag | off | Auto-discover MCP server |
+
+### Environment
+
+No API key required for the CLI wrapper. The MCP server handles model access.
+
+---
+
+## claude-flow.py
+
+Multi-agent orchestration for complex workflows. Coordinates multiple Claude agents working in parallel or sequence on related tasks.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `swarm_init` | Initialize a new agent swarm | `--agents`, `--config` |
+| `agent_spawn` | Spawn a new agent in the swarm | `--role`, `--task` |
+| `task_orchestrate` | Orchestrate task execution across agents | `--tasks`, `--strategy` |
+
+### Usage
+
+```bash
+# Initialize a swarm with specialized agents
+uv run claude-flow.py swarm_init --agents "researcher,implementer,reviewer"
+
+# Spawn an agent
+uv run claude-flow.py agent_spawn --role researcher --task "investigate caching patterns"
+
+# Orchestrate tasks
+uv run claude-flow.py task_orchestrate --tasks workflow.yaml --strategy parallel
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | text, json | text | Output format |
+| `--verbose` | flag | off | Show debug info |
+| `--discover` | flag | off | Auto-discover MCP server |
+
+### Environment
+
+No API key required for the CLI wrapper.
+
+---
+
+## flow-nexus.py
+
+Sandboxed execution environment for running code in isolated containers. Supports swarm scaling and agent management.
+
+### Functions
+
+| Function | Description | Key Parameters |
+|----------|-------------|----------------|
+| `swarm_init` | Initialize execution swarm | `--config` |
+| `swarm_scale` | Scale swarm up or down | `--count` |
+| `agent_spawn` | Spawn execution agent | `--role`, `--task` |
+| `sandbox_create` | Create isolated sandbox | `--language`, `--resources` |
+| `sandbox_execute` | Execute code in sandbox | `--code`, `--language`, `--timeout` |
+
+### Usage
+
+```bash
+# Create a sandbox
+uv run flow-nexus.py sandbox_create --language python
+
+# Execute code safely
+uv run flow-nexus.py sandbox_execute --code "print('hello')" --language python --timeout 30
+
+# Initialize and scale a swarm
+uv run flow-nexus.py swarm_init --config config.yaml
+uv run flow-nexus.py swarm_scale --count 5
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--format` | text, json | text | Output format |
+| `--verbose` | flag | off | Show debug info |
+| `--discover` | flag | off | Auto-discover MCP server |
+
+### Environment
+
+No API key required for the CLI wrapper.
+
+---
+
+## Tool Selection Guide
+
+| Scenario | Tool | Why |
+|----------|------|-----|
+| Break down a complex design decision | sequential-thinking | Step-by-step reasoning with progress tracking |
+| Debug an issue systematically | sequential-thinking | Forces structured analysis |
+| Coordinate parallel research tasks | claude-flow | Multiple agents working simultaneously |
+| Code review with multiple reviewers | claude-flow | Specialized agents per concern |
+| Run untrusted code safely | flow-nexus `sandbox_execute` | Isolated execution environment |
+| Test code without affecting system | flow-nexus | Sandboxed containers |
+
+## Related Files
+- `llm.architecture.txt` - Project conventions and setup
+- `llm.development.txt` - GitHub and Xcode development tools
