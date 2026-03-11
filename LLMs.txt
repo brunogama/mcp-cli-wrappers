@@ -1,0 +1,498 @@
+# CLI Wrappers - MCP Tool Collection
+
+> Token-efficient CLI wrappers for Model Context Protocol (MCP) servers
+> Location: `~/cli-wrappers/`
+> Status: Production-ready
+> Total Tools: 17 wrappers with 4-level progressive disclosure
+> Token Efficiency: 60-70% savings vs traditional MCP tool calling
+
+---
+
+## Overview
+
+CLI Wrappers is a collection of self-contained Python CLI tools that wrap MCP servers. Every tool implements a consistent 4-level progressive disclosure pattern to minimize token usage while maintaining complete functionality.
+
+### Key Characteristics
+
+- Progressive Disclosure: Level 1 (~30 tokens) through Level 4 (~500 tokens)
+- No Installation: PEP 723 inline dependencies with `uv` package manager
+- Consistent Interface: All tools follow the same CLI patterns
+- Multiple Output Formats: JSON, text, table
+- Production-Ready: Error handling, validation, timeout protection
+
+---
+
+## Architecture
+
+- Language: Python 3.10+
+- Package Manager: uv (Astral) with PEP 723 script execution
+- CLI Framework: Click (hand-crafted), argparse (generated)
+- HTTP Client: httpx with timeout protection
+- MCP Client: fastmcp >= 2.0
+- Output: Rich library for terminal formatting
+
+### Wrapper Types
+
+1. Auto-Generated (template-based): Use `templates/wrapper.jinja2`, argparse CLI, fastmcp tool calling
+2. Hand-Crafted (feature-rich): Click CLI, Rich output, full API integration, located in `*-cli/` subdirectories
+
+---
+
+## 4-Level Progressive Disclosure
+
+```
+Level 1 (--help):        Quick overview               ~30 tokens
+Level 2 (list/info):     Function catalog & docs      ~150 tokens
+Level 3 (example):       Working code examples        ~200 tokens
+Level 4 (FUNC --help):   Complete reference           ~500 tokens
+```
+
+```bash
+uv run crawl4ai.py --help          # Level 1
+uv run crawl4ai.py list            # Level 2
+uv run crawl4ai.py info scrape     # Level 2
+uv run crawl4ai.py example scrape  # Level 3
+uv run crawl4ai.py scrape --help   # Level 4
+```
+
+---
+
+## Complete Tool Catalog
+
+### Web Scraping & Content Extraction
+
+#### crawl4ai.py
+- Purpose: Fast web scraping and content extraction
+- API Key: None (local MCP server)
+- Functions:
+  - `scrape(url)` - Scrape single webpage
+  - `crawl(url, depth, max_pages)` - Crawl multiple pages
+  - `extract_content(url, selector)` - CSS selector extraction
+- Detail Levels: minimal, standard, full
+- Usage:
+  ```bash
+  uv run crawl4ai.py scrape --url https://example.com
+  uv run crawl4ai.py crawl --url https://docs.python.org --crawl-depth 2 --max-pages 10
+  uv run crawl4ai.py scrape --url https://example.com --detail minimal --format json
+  ```
+
+#### firecrawl.py
+- Purpose: Advanced web scraping with JavaScript rendering
+- API Key: `FIRECRAWL_API_KEY` (required)
+- MCP Package: `@anthropics/firecrawl-mcp`
+- Functions:
+  - `scrape(url, formats, only-main-content, wait-for)` - Scrape with JS rendering
+  - `crawl(url, limit, max-depth, include-paths, exclude-paths)` - Recursive crawling
+  - `extract(url, schema, prompt)` - Structured data extraction with LLM
+  - `map(url, search, limit)` - Discover all URLs on a site
+  - `search(query, limit, lang, country)` - Web search
+- Usage:
+  ```bash
+  uv run firecrawl.py scrape --url "https://spa-app.com"
+  uv run firecrawl.py crawl --url "https://docs.example.com" --limit 50
+  uv run firecrawl.py map --url "https://example.com"
+  uv run firecrawl.py extract --url "https://store.com/product" --schema '{"name":"string","price":"number"}'
+  uv run firecrawl.py search --query "machine learning tutorials"
+  ```
+
+#### gitmcp.py
+- Purpose: Fetch documentation from GitHub repositories
+- API Key: None
+- Functions:
+  - `fetch_generic_documentation(owner, repo)` - Get llms.txt/README
+  - `search_generic_documentation(owner, repo, query)` - Search repo docs
+- Usage:
+  ```bash
+  uv run gitmcp.py fetch_generic_documentation --owner anthropics --repo claude-code
+  uv run gitmcp.py search_generic_documentation --owner jlowin --repo fastmcp --query "tools"
+  ```
+
+---
+
+### Search & Information Retrieval
+
+#### exa.py
+- Purpose: Neural semantic web search and agentic research
+- API Key: `EXA_API_KEY` (required)
+- Version: 1.1.0
+- Functions:
+  - `search(query, num_results, type, category, include_domains, exclude_domains, start_published_date, include_text, include_highlights, include_summary)` - Semantic neural search
+  - `deep-search(query, additional_queries, num_results, include_text, include_summary)` - Comprehensive search with query expansion
+  - `research(instructions, model, output_schema)` - Agentic research: plans, searches, and synthesizes across sources with citations
+  - `code-search(query, num_results, include_domains, include_text, include_highlights)` - Find code on GitHub, Stack Overflow, and docs
+  - `company-research(company_name, num_results, include_news, start_date, include_summary)` - Business intelligence
+  - `find-similar(url, num_results, include_text)` - Semantic similarity content discovery
+  - `get-contents(urls, text_verbosity, include_html_tags, livecrawl, max_characters)` - Extract full content from URLs
+- Search Types: auto, neural, fast
+- Research Models: exa-research (45-90s), exa-research-pro (90-180s, max quality)
+- Categories: company, research_paper, news, tweet, personal_site, financial_report, people
+- Usage:
+  ```bash
+  uv run exa.py search "machine learning transformers 2025"
+  uv run exa.py research "What are the tradeoffs between gRPC and REST?"
+  uv run exa.py code-search "async await Python examples"
+  uv run exa.py get-contents "https://example.com/article" --livecrawl
+  ```
+
+#### ref-cli/cli.py
+- Purpose: Technical documentation search and reading
+- API Key: `REF_API_KEY` (required)
+- Functions:
+  - `search(query, limit, filter)` - Search technical documentation
+  - `read_url(url, extract_code, include_metadata)` - Extract doc content
+  - `check(filepath, strict)` - Validate files
+  - `analyze(path, recursive, include, exclude)` - Analyze directory
+  - `config()` - Show configuration
+- Usage:
+  ```bash
+  uv run ref-cli/cli.py search --query "async await python"
+  uv run ref-cli/cli.py read_url --url "https://docs.python.org/3/library/asyncio.html"
+  ```
+
+#### brave-search-cli/cli.py
+- Purpose: Privacy-focused web search
+- API Key: `BRAVE_API_KEY` (required)
+- Functions:
+  - `web_search(query, country, count, safesearch, freshness)` - Web search
+  - `local_search(query, country, count)` - Local business search (Pro)
+  - `video_search(query)` - Video search
+  - `image_search(query)` - Image search
+  - `news_search(query, freshness)` - News search
+  - `summarizer(query)` - AI summaries
+- Freshness: pd (past day), pw (past week), pm (past month)
+- Usage:
+  ```bash
+  uv run brave-search-cli/cli.py web_search "python tutorials"
+  uv run brave-search-cli/cli.py news_search "AI developments" --freshness pw
+  ```
+
+#### tavily-cli/cli.py
+- Purpose: AI-optimized web search
+- API Key: `TAVILY_API_KEY` (required)
+- Functions:
+  - `search(query, search_depth, include_answer, include_sources)` - Optimized search
+  - `search_context(query, topic, context)` - Search with context
+  - `qna(query)` - Question & answer search
+- Search Depths: basic, advanced
+- Usage:
+  ```bash
+  uv run tavily-cli/cli.py search --query "React hooks best practices"
+  uv run tavily-cli/cli.py qna --query "What is the JAM stack?"
+  ```
+
+#### perplexity-cli/cli.py
+- Purpose: Perplexity AI search integration
+- API Key: `PERPLEXITY_API_KEY` (required)
+- Functions:
+  - `search(query, model, focus)` - Perplexity search
+  - `stream(query)` - Streaming search results
+  - `research(topic, num_sources)` - Deep research mode
+- Models: pplx-7b-online, pplx-70b-online
+- Focus: internet, academic, writing
+- Usage:
+  ```bash
+  uv run perplexity-cli/cli.py search --query "latest AI developments"
+  uv run perplexity-cli/cli.py research --topic "quantum computing"
+  ```
+
+---
+
+### Code & Repository Analysis
+
+#### deepwiki.py
+- Purpose: Ask questions about any GitHub repository
+- API Key: None
+- Functions:
+  - `ask(owner, repo, question)` - Ask about a repository
+  - `explain(owner, repo, path)` - Explain a file or directory
+  - `architecture(owner, repo)` - Get architectural overview
+- Usage:
+  ```bash
+  uv run deepwiki.py ask --owner facebook --repo react --question "How does the reconciler work?"
+  uv run deepwiki.py architecture --owner apple --repo swift
+  ```
+
+#### repomix.py
+- Purpose: Pack codebases for AI analysis
+- API Key: None
+- Functions:
+  - `pack_codebase(path, include, exclude, output)` - Pack local codebase
+  - `pack_remote_repository(owner, repo, output)` - Pack GitHub repo
+  - `generate_skill(path, output)` - Generate Claude skill
+  - `attach_packed_output(data, filepath)` - Attach packed output
+  - `grep_repomix_output(content, pattern)` - Search packed content
+- Filters: `--include "*.swift"`, `--exclude "Tests/*"`
+- Usage:
+  ```bash
+  uv run repomix.py pack_codebase ~/my-project
+  uv run repomix.py pack_remote_repository --owner jlowin --repo fastmcp
+  ```
+
+#### semly.py
+- Purpose: Semantic code search and analysis
+- API Key: `SEMLY_API_KEY` (required)
+- Functions:
+  - `outline(path, recursive)` - Generate code outline
+  - `search(query, path, language)` - Semantic code search
+  - `analyze(filepath)` - Analyze file structure
+  - `references(symbol, path)` - Find symbol references
+- Usage:
+  ```bash
+  uv run semly.py outline /path/to/project
+  uv run semly.py search "authentication" --path /path/to/codebase
+  ```
+
+---
+
+### Reasoning & Orchestration
+
+#### sequential-thinking-cli/cli.py
+- Purpose: Multi-step reasoning chains for complex problems
+- API Key: None
+- Functions:
+  - `sequentialthinking(thought, thoughtNumber, totalThoughts, nextThoughtNeeded)` - Chain reasoning
+- Parameters: thought (string), thoughtNumber (int), totalThoughts (int), nextThoughtNeeded (bool), isRevision (bool), revisesThought (int), branchFromThought (int), branchId (string)
+- Usage:
+  ```bash
+  uv run sequential-thinking-cli/cli.py sequentialthinking \
+    --thought "Analyzing the root cause" --thoughtNumber 1 \
+    --totalThoughts 5 --nextThoughtNeeded true
+  ```
+
+#### claude-flow.py
+- Purpose: Multi-agent orchestration and workflow coordination
+- API Key: None
+- Functions:
+  - `create_swarm(agents, config)` - Create agent swarm
+  - `execute_workflow(config)` - Execute multi-step workflow
+  - `coordinate_agents(tasks, dependencies)` - Coordinate agent tasks
+  - `list()` - List active swarms
+  - `status(swarm_id)` - Get swarm status
+- Usage:
+  ```bash
+  uv run claude-flow.py create_swarm --agents "researcher,implementer,reviewer"
+  uv run claude-flow.py execute_workflow --config workflow.yaml
+  ```
+
+#### flow-nexus.py
+- Purpose: Sandboxed code execution environments
+- API Key: None
+- Functions:
+  - `execute(code, language, timeout)` - Execute code in sandbox
+  - `run_script(file, sandbox, language)` - Run script in isolation
+  - `list_environments()` - List available environments
+  - `create_environment(python_version, packages)` - Create custom environment
+- Supported Languages: Python, JavaScript, Go, Rust, Ruby
+- Usage:
+  ```bash
+  uv run flow-nexus.py execute --code "print('hello')" --language python
+  uv run flow-nexus.py run_script --file script.py --sandbox true
+  ```
+
+---
+
+### Development Tools
+
+#### xcode-cli/cli.py
+- Purpose: Xcode build, test, and project control
+- API Key: None (requires macOS with Xcode)
+- Functions:
+  - Project: `xcode_open_project()`, `xcode_close_project()`, `xcode_refresh_project()`
+  - Info: `xcode_get_schemes()`, `xcode_get_workspace_info()`, `xcode_open_file()`
+  - Build: `xcode_build()`, `xcode_clean()`, `xcode_build_and_run()`
+  - Test: `xcode_test()` with test plan and selection
+  - Debug: `xcode_debug()`, `xcode_stop()`
+  - Analysis: `xcresult_summary()`, `xcresult_test_details()`, `xcresult_screenshots()`, `xcresult_logs()`
+- Usage:
+  ```bash
+  uv run xcode-cli/cli.py xcode_get_schemes --xcodeproj /path/to/MyApp.xcodeproj
+  uv run xcode-cli/cli.py xcode_build --xcodeproj /path/to/MyApp.xcodeproj --scheme MyApp
+  uv run xcode-cli/cli.py xcode_test --xcodeproj /path/to/MyApp.xcodeproj --destination "iPhone 15"
+  uv run xcode-cli/cli.py xcresult_summary --xcresult_path /path/to/Test.xcresult
+  ```
+
+#### apple-docset-cli/cli.py
+- Purpose: Query local Apple/Xcode documentation
+- API Key: None (requires macOS with Xcode)
+- Functions:
+  - `list_docsets()` - List available DocSets
+  - `search(query, limit, docset)` - Search API symbols
+  - `fetch(docset, path)` - Get full documentation
+  - `export(docset, output, max)` - Export to JSONL
+  - `availability(symbol, docset)` - Check API availability
+- Usage:
+  ```bash
+  uv run apple-docset-cli/cli.py list_docsets
+  uv run apple-docset-cli/cli.py search "NSView" --limit 10
+  uv run apple-docset-cli/cli.py fetch --docset "Apple API Reference" --path "documentation/appkit/nsview"
+  ```
+
+---
+
+## Response Formats
+
+### Standard Response
+```json
+{
+    "success": true,
+    "data": {},
+    "count": 5,
+    "timestamp": "2025-02-22T10:30:00Z"
+}
+```
+
+### Error Response
+```json
+{
+    "success": false,
+    "error": "Description",
+    "error_code": "INVALID_ARGUMENT",
+    "tool": "tool_name",
+    "recovery": "Suggested fix"
+}
+```
+
+### Output Format Flags
+```bash
+--format json       # Machine-readable (default)
+--format text       # Human-readable
+--format table      # ASCII tables
+--detail minimal    # Status only (~50 tokens)
+--detail standard   # Preview (~150 tokens)
+--detail full       # Complete (default)
+```
+
+---
+
+## Environment Variables
+
+### Required API Keys
+
+| Variable | Tool | Required |
+|----------|------|----------|
+| `EXA_API_KEY` | exa.py | Yes |
+| `REF_API_KEY` | ref-cli | Yes |
+| `BRAVE_API_KEY` | brave-search-cli | Yes |
+| `TAVILY_API_KEY` | tavily-cli | Yes |
+| `PERPLEXITY_API_KEY` | perplexity-cli | Yes |
+| `SEMLY_API_KEY` | semly.py | Yes |
+
+### Optional
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `CRAWL4AI_MCP_DIR` | Local MCP server path | Auto-detect |
+| `EXA_API_URL` | Exa API endpoint | https://api.exa.ai |
+| `EXA_TIMEOUT` | Exa request timeout in seconds | 60 |
+| `TIMEOUT` | Global timeout | 30s |
+| `VERBOSE` | Enable verbose output | False |
+
+---
+
+## Project Structure
+
+```
+cli-wrappers/
++-- CLAUDE.md                     # Development rules (authoritative)
++-- README.md                     # User-facing overview
++-- ONBOARDING.md                 # Developer guide
++-- QUICKSTART.md                 # 5-minute setup
++-- LLMs.txt                      # This file
++-- LLMs-SUMMARY.txt              # Condensed version
+|
++-- # Root-level wrappers (PEP 723 scripts)
++-- crawl4ai.py                   # Web scraping
++-- exa.py                        # Neural semantic search and agentic research (v1.1.0)
++-- deepwiki.py                   # GitHub repo Q&A
++-- gitmcp.py                     # GitHub docs fetching
++-- repomix.py                    # Codebase packing
++-- semly.py                      # Code analysis
++-- claude-flow.py                # Multi-agent orchestration
++-- firecrawl.py                  # Advanced JS scraping
++-- flow-nexus.py                 # Sandboxed execution
+|
++-- # Sub-project wrappers (with tests)
++-- brave-search-cli/             # Brave Search
++-- perplexity-cli/               # Perplexity search
++-- ref-cli/                      # Documentation search
++-- sequential-thinking-cli/      # Multi-step reasoning
++-- tavily-cli/                   # Tavily search
++-- xcode-cli/                    # Xcode control
++-- apple-docset-cli/             # Apple documentation
+|
++-- # Code generation
++-- generate-all-wrappers.py      # Master generator
++-- templates/
+|   +-- wrapper.jinja2            # Wrapper template
+|
++-- .claude/                      # Claude Code configuration
++-- .planning/                    # Architecture documentation
+```
+
+---
+
+## Quick Reference
+
+```bash
+# Discovery
+uv run TOOL.py --help
+uv run TOOL.py list
+uv run TOOL.py info FUNCTION
+uv run TOOL.py example FUNCTION
+uv run TOOL.py FUNCTION --help
+
+# Web Scraping
+uv run crawl4ai.py scrape --url URL
+
+# Search
+uv run exa.py search "query"
+uv run exa.py research "complex question requiring synthesis"
+uv run exa.py code-search "implementation example"
+uv run ref-cli/cli.py search --query "docs"
+uv run brave-search-cli/cli.py web_search "query"
+
+# Code Analysis
+uv run repomix.py pack_codebase PATH
+uv run deepwiki.py ask --owner OWNER --repo REPO --question "?"
+uv run semly.py outline PATH
+
+# Development
+uv run xcode-cli/cli.py xcode_build --xcodeproj PATH --scheme SCHEME
+uv run apple-docset-cli/cli.py search "NSView"
+
+# Reasoning
+uv run sequential-thinking-cli/cli.py sequentialthinking --thought "..." --thoughtNumber 1 --totalThoughts 5 --nextThoughtNeeded true
+```
+
+---
+
+## Getting Started
+
+```bash
+cd ~/cli-wrappers
+uv run crawl4ai.py --help           # Test installation
+uv run crawl4ai.py list             # See functions
+uv run crawl4ai.py info scrape      # Function details
+uv run crawl4ai.py example scrape   # Working example
+uv run crawl4ai.py scrape --url https://example.com  # Execute
+```
+
+---
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| `uv: command not found` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| Missing API key | `export KEY="value"` |
+| MCP server not found | `export CRAWL4AI_MCP_DIR=~/path` |
+| Connection timeout | `export TIMEOUT=60` |
+| Invalid JSON | `uv run tool --format json list \| jq .` |
+
+---
+
+Last Updated: 2026-03-11
+Python: 3.10+
+Total Tools: 17 wrappers (9 root-level, 7 sub-projects, 1 generator)
+Status: Production-ready
+Token Efficiency: 60-70% savings

@@ -1,0 +1,100 @@
+# CLI Wrappers - Quick Reference
+
+**17 Python CLI wrappers for MCP servers**
+**Location**: `~/cli-wrappers/`
+**Token Efficiency**: 60-70% savings vs traditional MCP tool calling
+
+---
+
+## 4-Level Help (Every Tool)
+
+```bash
+uv run TOOL.py --help              # Level 1: Quick overview (~30 tokens)
+uv run TOOL.py list                # Level 2: All functions (~150 tokens)
+uv run TOOL.py info FUNCTION       # Level 2: Function details
+uv run TOOL.py example FUNCTION    # Level 3: Working examples (~200 tokens)
+uv run TOOL.py FUNCTION --help     # Level 4: Complete reference (~500 tokens)
+```
+
+## Tool Catalog
+
+### Web Scraping
+| Tool | API Key | Key Function |
+|------|---------|--------------|
+| **crawl4ai.py** | None | `scrape(url)` - Fast web scraping |
+| **firecrawl.py** | `FIRECRAWL_API_KEY` | `scrape(url)` - JS rendering, `map()`, `extract()` |
+| **gitmcp.py** | None | `fetch_generic_documentation()` |
+
+### Search
+| Tool | API Key | Key Function |
+|------|---------|--------------|
+| **exa.py** | `EXA_API_KEY` | `search()` - Neural search, `research()` - Agentic research with citations |
+| **ref-cli/cli.py** | `REF_API_KEY` | `search()` - Technical docs |
+| **brave-search-cli/cli.py** | `BRAVE_API_KEY` | `web_search()` - Privacy search |
+| **tavily-cli/cli.py** | `TAVILY_API_KEY` | `search()` - AI-optimized search |
+| **perplexity-cli/cli.py** | `PERPLEXITY_API_KEY` | `search()` - Perplexity AI |
+
+### Code & Repository Analysis
+| Tool | API Key | Key Function |
+|------|---------|--------------|
+| **deepwiki.py** | None | `ask()` - Ask about GitHub repos |
+| **repomix.py** | None | `pack_codebase()` - Pack for AI |
+| **semly.py** | `SEMLY_API_KEY` | `outline()` - Code structure |
+
+### Reasoning & Orchestration
+| Tool | API Key | Key Function |
+|------|---------|--------------|
+| **sequential-thinking-cli/cli.py** | None | `sequentialthinking()` |
+| **claude-flow.py** | None | `create_swarm()` - Multi-agent |
+| **flow-nexus.py** | None | `execute()` - Sandboxed execution |
+
+### Development
+| Tool | API Key | Key Function |
+|------|---------|--------------|
+| **xcode-cli/cli.py** | None | `xcode_build()`, `xcode_test()` |
+| **apple-docset-cli/cli.py** | None | `search()` - Apple API docs |
+
+## Common Commands
+
+```bash
+# Web
+uv run crawl4ai.py scrape --url URL
+uv run firecrawl.py scrape --url URL
+uv run exa.py search "query"
+uv run exa.py research "multi-step question requiring synthesis"
+uv run exa.py code-search "implementation pattern or API example"
+uv run ref-cli/cli.py search --query "docs"
+
+# Code
+uv run repomix.py pack_codebase PATH
+uv run deepwiki.py ask --owner OWNER --repo REPO --question "?"
+uv run semly.py outline PATH
+
+# Dev
+uv run xcode-cli/cli.py xcode_build --xcodeproj PATH --scheme SCHEME
+uv run apple-docset-cli/cli.py search "NSView"
+```
+
+## Output Formats
+
+```bash
+--format json|text|table
+--detail minimal|standard|full
+```
+
+## Environment Setup
+
+```bash
+export FIRECRAWL_API_KEY="..."
+export EXA_API_KEY="..."
+export REF_API_KEY="..."
+export BRAVE_API_KEY="..."
+export TAVILY_API_KEY="..."
+export PERPLEXITY_API_KEY="..."
+export SEMLY_API_KEY="..."
+```
+
+---
+
+Last Updated: 2026-03-11
+For complete reference, see LLMs.txt
