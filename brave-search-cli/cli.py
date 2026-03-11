@@ -40,7 +40,10 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-load_dotenv()
+# Load environment variables from script directory (.env first, then .env.local overrides)
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_script_dir, ".env"))
+load_dotenv(os.path.join(_script_dir, ".env.local"), override=True)
 
 console = Console()
 

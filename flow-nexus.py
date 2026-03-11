@@ -7,6 +7,7 @@
 #     "pydantic>=2.0",
 #     "click>=8.0",
 #     "rich>=13.0",
+#     "python-dotenv>=1.0.0",
 # ]
 # ///
 """
@@ -29,7 +30,13 @@ import os
 import sys
 from typing import Dict, Any, Optional
 
+from dotenv import load_dotenv
 from fastmcp import Client
+
+# Load environment variables from script directory (.env first, then .env.local overrides)
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_script_dir, ".env"))
+load_dotenv(os.path.join(_script_dir, ".env.local"), override=True)
 
 # ===== MCP CLIENT CONFIGURATION =====
 

@@ -42,8 +42,10 @@ except ImportError as e:
     print("Run: uv run cli.py --help")
     sys.exit(1)
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from script directory (.env first, then .env.local overrides)
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_script_dir, ".env"))
+load_dotenv(os.path.join(_script_dir, ".env.local"), override=True)
 
 console = Console()
 

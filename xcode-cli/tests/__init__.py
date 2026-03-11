@@ -1,0 +1,1 @@
+"""XcodeMCP CLI tests package."""

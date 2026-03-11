@@ -6,6 +6,7 @@
 #     "httpx>=0.24.0",
 #     "httpx-sse>=0.4.0",
 #     "pydantic>=2.0",
+#     "python-dotenv>=1.0.0",
 # ]
 # ///
 """
@@ -32,8 +33,14 @@ from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
 
 import httpx
+from dotenv import load_dotenv
 from mcp import ClientSession
 from mcp.client.sse import sse_client
+
+# Load environment variables from script directory (.env first, then .env.local overrides)
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_script_dir, ".env"))
+load_dotenv(os.path.join(_script_dir, ".env.local"), override=True)
 
 # ===== MCP CLIENT CONFIGURATION =====
 

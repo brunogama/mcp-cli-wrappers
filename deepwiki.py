@@ -6,6 +6,7 @@
 #     "pydantic>=2.0",
 #     "click>=8.0",
 #     "rich>=13.0",
+#     "python-dotenv>=1.0.0",
 # ]
 # ///
 """
@@ -32,6 +33,12 @@ from enum import Enum
 from typing import Any
 
 import httpx
+from dotenv import load_dotenv
+
+# Load environment variables from script directory (.env first, then .env.local overrides)
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_script_dir, ".env"))
+load_dotenv(os.path.join(_script_dir, ".env.local"), override=True)
 
 
 # ===== DETAIL LEVEL ENUM =====
